@@ -14,61 +14,36 @@ upload = function (client, credentials) {
   ({ name, authorization } = credentials);
   return (() => {
     var _ref = _asyncToGenerator(function* (file) {
-      var UploadId, chunks, constraints, end, formData, mediaID, pair, parts, response, size, start, type, url, value;
+      var PartNumber, UploadId, chunks, end, mediaID, parts, resource, response, size, start, type;
       ({ size, type } = file);
-      console.log(`uploading file: ${type}, ${size}`);
       // Create the upload entity in the Sky API, get back an array of signed URLs granting you permission to upload file chunks directly to S3.
-      console.log("requesting signed URLs from sky API");
       ({ chunks, mediaID, UploadId } = yield client.uploads({ name }).post({
         authorization: authorization,
         body: { size, type }
       }));
-      console.log("Key:", mediaID);
-      console.log("UploadId:", UploadId);
-      console.log("chunks:", chunks);
       // Upload the file to S3. Collect the ETags from each chunk.
-      console.log("uploading directly to S3");
       parts = yield _asyncToGenerator(function* () {
-        var i, j, len, len1, ref, ref1, results;
+        var i, len, results;
         results = [];
         for (i = 0, len = chunks.length; i < len; i++) {
-          ({ start, end, constraints } = chunks[i]);
-          url = `http://${constraints.fields.bucket}.s3.amazonaws.com`;
-          formData = new FormData();
-          ref = constraints.fields;
-          for (name in ref) {
-            value = ref[name];
-            if (name !== "bucket") {
-              formData.append(name, value.toString());
-            }
-          }
-          formData.append("Content-Length", (end - start).toString());
-          ref1 = formData.entries();
-          for (j = 0, len1 = ref1.length; j < len1; j++) {
-            pair = ref1[j];
-            console.log(pair);
-          }
-          // The file field has to always go last.
-          formData.append("file", file.slice(start, end));
-          response = yield window.fetch(url, {
-            method: "POST",
-            body: formData
+          ({ start, end, PartNumber, resource } = chunks[i]);
+          response = yield window.fetch(resource.url, {
+            method: "PUT",
+            headers: resource.headers,
+            body: file.slice(start, end, type)
           });
           results.push({
-            PartNumber: constraints.fields.PartNumber,
+            PartNumber,
             ETag: response.headers.get("ETag")
           });
         }
         return results;
       })();
-      console.log("upload complete:", parts);
       // Signal to the Sky API that the upload is complete.
-      console.log("singaling completion to Sky API");
       yield client.media({ name, mediaID }).put({
         authorization: authorization,
         body: { parts }
       });
-      console.log(`upload successful.  Reference ${mediaID}`);
       return mediaID;
     });
 
