@@ -7,7 +7,7 @@ upload = (client, credentials) ->
     {size, type} = file
 
     # Create the upload entity in the Sky API, get back an array of signed URLs granting you permission to upload file chunks directly to S3.
-    {chunks, mediaID, UploadId} = await client.uploads({name})
+    {chunks, id, UploadId} = await client.uploads({name})
     .post
       authorization: authorization
       body: {size, type}
@@ -23,12 +23,12 @@ upload = (client, credentials) ->
         {PartNumber, ETag: response.headers.get "ETag"}
 
     # Signal to the Sky API that the upload is complete.
-    await client.media({name, mediaID})
+    await client.media({name, id})
       .put
         authorization: authorization
         body: {parts}
 
-    mediaID
+    id
 
 
 export default upload
