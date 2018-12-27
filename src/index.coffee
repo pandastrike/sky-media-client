@@ -2,10 +2,14 @@
 
 import upload from "./upload"
 
-start = (skyClient, credentials) ->
+start = (skyClient, credentials, fetch) ->
+  # In the browser, we have access to the Fetch API, but in Node, you need to supply your own.
+  if !(fetch ?= window?.fetch)?
+    throw new Error "Provide fetch API, ex: fetch-h2"
+
   Object.defineProperties {},
     upload:
       enumerable: true
-      get: -> upload skyClient, credentials
+      get: -> upload skyClient, credentials, fetch
 
 export default start

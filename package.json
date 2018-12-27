@@ -1,6 +1,6 @@
 {
   "name": "sky-media-client",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Universal Client For a Panda Sky Media Uploads Using AWS Multipart S3",
   "main": "build/npm/src/index.js",
   "files": [
