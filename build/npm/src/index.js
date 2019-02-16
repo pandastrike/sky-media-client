@@ -4,30 +4,41 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-
-var _upload = _interopRequireDefault(require("./upload"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// This module wraps an instanciated Sky Client object and outputs a simple interface for uploading potentially large files directly to S3 via its multipart upload cycle, all managed (and signed) by the parent Sky API.
 var start;
 
-start = function (skyClient, credentials, fetch) {
+start = function (fetch) {
   if ((fetch != null ? fetch : fetch = typeof window !== "undefined" && window !== null ? window.fetch : void 0) == null) {
     throw new Error("Provide fetch API, ex: fetch-h2");
   }
 
-  return Object.defineProperties({}, {
-    upload: {
-      enumerable: true,
-      get: function () {
-        return (0, _upload.default)(skyClient, credentials, fetch);
-      }
+  return async function (file, chunks) {
+    var PartNumber, end, i, len, resource, response, results; // Upload the file to S3. Collect the ETags from each chunk.
+
+    results = [];
+
+    for (i = 0, len = chunks.length; i < len; i++) {
+      ({
+        start,
+        end,
+        PartNumber,
+        resource
+      } = chunks[i]);
+      response = await fetch(resource.url, {
+        method: "PUT",
+        headers: resource.headers,
+        body: file.slice(start, end)
+      });
+      results.push({
+        PartNumber,
+        ETag: response.headers.get("ETag")
+      });
     }
-  });
+
+    return results;
+  };
 };
 
 var _default = start;
 exports.default = _default;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmNvZmZlZSJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBRUE7Ozs7QUFGQTtBQUFBLElBQUEsS0FBQTs7QUFJQSxLQUFBLEdBQVEsVUFBQSxTQUFBLEVBQUEsV0FBQSxFQUFBLEtBQUEsRUFBQTtBQUVOLE1BQUksQ0FBQSxLQUFBLElBQUEsSUFBQSxHQUFBLEtBQUEsR0FBQSxLQUFBLEdBQUEsT0FBQSxNQUFBLEtBQUEsV0FBQSxJQUFBLE1BQUEsS0FBQSxJQUFBLEdBQUEsTUFBQSxDQUFBLEtBQUEsR0FBQSxLQUFBLENBQUEsS0FBSixJQUFBLEVBQUE7QUFDRSxVQUFNLElBQUEsS0FBQSxDQURSLGlDQUNRLENBQU47OztTQUVGLE1BQU0sQ0FBTixnQkFBQSxDQUFBLEVBQUEsRUFDRTtBQUFBLElBQUEsTUFBQSxFQUNFO0FBQUEsTUFBQSxVQUFBLEVBQUEsSUFBQTtBQUNBLE1BQUEsR0FBQSxFQUFLLFlBQUE7ZUFBRyxxQkFBQSxTQUFBLEVBQUEsV0FBQSxFQUFBLEtBQUEsQztBQUFIO0FBREw7QUFERixHQURGLEM7QUFMTSxDQUFSOztlQVVlLEsiLCJzb3VyY2VzQ29udGVudCI6WyIjIFRoaXMgbW9kdWxlIHdyYXBzIGFuIGluc3RhbmNpYXRlZCBTa3kgQ2xpZW50IG9iamVjdCBhbmQgb3V0cHV0cyBhIHNpbXBsZSBpbnRlcmZhY2UgZm9yIHVwbG9hZGluZyBwb3RlbnRpYWxseSBsYXJnZSBmaWxlcyBkaXJlY3RseSB0byBTMyB2aWEgaXRzIG11bHRpcGFydCB1cGxvYWQgY3ljbGUsIGFsbCBtYW5hZ2VkIChhbmQgc2lnbmVkKSBieSB0aGUgcGFyZW50IFNreSBBUEkuXG5cbmltcG9ydCB1cGxvYWQgZnJvbSBcIi4vdXBsb2FkXCJcblxuc3RhcnQgPSAoc2t5Q2xpZW50LCBjcmVkZW50aWFscywgZmV0Y2gpIC0+XG4gICMgSW4gdGhlIGJyb3dzZXIsIHdlIGhhdmUgYWNjZXNzIHRvIHRoZSBGZXRjaCBBUEksIGJ1dCBpbiBOb2RlLCB5b3UgbmVlZCB0byBzdXBwbHkgeW91ciBvd24uXG4gIGlmICEoZmV0Y2ggPz0gd2luZG93Py5mZXRjaCk/XG4gICAgdGhyb3cgbmV3IEVycm9yIFwiUHJvdmlkZSBmZXRjaCBBUEksIGV4OiBmZXRjaC1oMlwiXG5cbiAgT2JqZWN0LmRlZmluZVByb3BlcnRpZXMge30sXG4gICAgdXBsb2FkOlxuICAgICAgZW51bWVyYWJsZTogdHJ1ZVxuICAgICAgZ2V0OiAtPiB1cGxvYWQgc2t5Q2xpZW50LCBjcmVkZW50aWFscywgZmV0Y2hcblxuZXhwb3J0IGRlZmF1bHQgc3RhcnRcbiJdLCJzb3VyY2VSb290IjoiIn0=
-//# sourceURL=index.coffee
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9kYXZpZC9yZXBvcy9za3ktbWVkaWEtY2xpZW50L3NyYy9pbmRleC5jb2ZmZWUiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7O0FBQUEsSUFBQSxLQUFBOztBQUFBLEtBQUEsR0FBUSxVQUFBLEtBQUEsRUFBQTtBQUVOLE1BQUksQ0FBQSxLQUFBLElBQUEsSUFBQSxHQUFBLEtBQUEsR0FBQSxLQUFBLEdBQUEsT0FBQSxNQUFBLEtBQUEsV0FBQSxJQUFBLE1BQUEsS0FBQSxJQUFBLEdBQUEsTUFBQSxDQUFBLEtBQUEsR0FBQSxLQUFBLENBQUEsS0FBSixJQUFBLEVBQUE7QUFDRSxVQUFNLElBQUEsS0FBQSxDQURSLGlDQUNRLENBQU47OztTQUVGLGdCQUFBLElBQUEsRUFBQSxNQUFBLEVBQUE7QUFFRSxRQUFBLFVBQUEsRUFBQSxHQUFBLEVBQUEsQ0FBQSxFQUFBLEdBQUEsRUFBQSxRQUFBLEVBQUEsUUFBQSxFQUFBLE9BQUEsQ0FGRixDOztBQUVFLElBQUEsT0FBQSxHQUFBLEVBQUE7O0FBQUEsU0FBQSxDQUFBLEdBQUEsQ0FBQSxFQUFBLEdBQUEsR0FBQSxNQUFBLENBQUEsTUFBQSxFQUFBLENBQUEsR0FBQSxHQUFBLEVBQUEsQ0FBQSxFQUFBLEVBQUE7T0FBSTtBQUFBLFFBQUEsS0FBQTtBQUFBLFFBQUEsR0FBQTtBQUFBLFFBQUEsVUFBQTtBQUFBLFFBQUE7QUFBQSxVQUFBLE1BQUEsQ0FBQSxDQUFBLEM7QUFDRixNQUFBLFFBQUEsR0FBVyxNQUFNLEtBQUEsQ0FBTSxRQUFRLENBQWQsR0FBQSxFQUNmO0FBQUEsUUFBQSxNQUFBLEVBQUEsS0FBQTtBQUNBLFFBQUEsT0FBQSxFQUFTLFFBQVEsQ0FEakIsT0FBQTtBQUVBLFFBQUEsSUFBQSxFQUFNLElBQUksQ0FBSixLQUFBLENBQUEsS0FBQSxFQUFBLEdBQUE7QUFGTixPQURlLENBQWpCO21CQUtBO0FBQUEsUUFBQSxVQUFBO0FBQWEsUUFBQSxJQUFBLEVBQU0sUUFBUSxDQUFDLE9BQVQsQ0FBQSxHQUFBLENBQUEsTUFBQTtBQUFuQixPO0FBTkY7OztBQUZGLEc7QUFMTSxDQUFSOztlQWVlLEsiLCJzb3VyY2VzQ29udGVudCI6WyJzdGFydCA9IChmZXRjaCkgLT5cbiAgIyBJbiB0aGUgYnJvd3Nlciwgd2UgaGF2ZSBhY2Nlc3MgdG8gdGhlIEZldGNoIEFQSSwgYnV0IGluIE5vZGUsIHlvdSBuZWVkIHRvIHN1cHBseSB5b3VyIG93bi5cbiAgaWYgIShmZXRjaCA/PSB3aW5kb3c/LmZldGNoKT9cbiAgICB0aHJvdyBuZXcgRXJyb3IgXCJQcm92aWRlIGZldGNoIEFQSSwgZXg6IGZldGNoLWgyXCJcblxuICAoZmlsZSwgY2h1bmtzKSAtPlxuICAgICMgVXBsb2FkIHRoZSBmaWxlIHRvIFMzLiBDb2xsZWN0IHRoZSBFVGFncyBmcm9tIGVhY2ggY2h1bmsuXG4gICAgZm9yIHtzdGFydCwgZW5kLCBQYXJ0TnVtYmVyLCByZXNvdXJjZX0gaW4gY2h1bmtzXG4gICAgICByZXNwb25zZSA9IGF3YWl0IGZldGNoIHJlc291cmNlLnVybCxcbiAgICAgICAgbWV0aG9kOiBcIlBVVFwiXG4gICAgICAgIGhlYWRlcnM6IHJlc291cmNlLmhlYWRlcnNcbiAgICAgICAgYm9keTogZmlsZS5zbGljZSBzdGFydCwgZW5kXG5cbiAgICAgIHtQYXJ0TnVtYmVyLCBFVGFnOiByZXNwb25zZS5oZWFkZXJzLmdldCBcIkVUYWdcIn1cblxuZXhwb3J0IGRlZmF1bHQgc3RhcnRcbiJdLCJzb3VyY2VSb290IjoiIn0=
+//# sourceURL=/Users/david/repos/sky-media-client/src/index.coffee
