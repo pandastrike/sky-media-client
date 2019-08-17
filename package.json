@@ -1,15 +1,13 @@
 {
   "name": "sky-media-client",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Universal Client For a Panda Sky Media Uploads Using AWS Multipart S3",
   "main": "build/npm/src/index.js",
   "files": [
     "build/npm/src",
     "LICENSE"
   ],
-  "scripts": {
-    "gulp": "gulp"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pandastrike/sky-media-client.git"
@@ -38,8 +36,8 @@
   },
   "homepage": "https://github.com/pandastrike/sky-media-client#readme",
   "devDependencies": {
-    "panda-9000": "^4.4.0",
-    "panda-builder": "^3.2.1"
+    "panda-9000": "^5.0.0",
+    "panda-builder": "^4.0.0"
   },
   "dependencies": {}
 }
